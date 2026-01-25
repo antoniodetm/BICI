@@ -15,20 +15,20 @@
 
         .hour-card { display: flex; align-items: center; padding: 25px 15px; border-bottom: 1px solid #1a1a1a; border-left: 14px solid #333; background: #000; }
         
-        /* Ajuste preciso para que la primera hora se vea completa */
         .hour-time-box { min-width: 85px; display: flex; align-items: center; }
         
         .hour-input { 
             background: #111; color: #fff; border: 1px solid #333; font-size: 1.1rem; 
             font-weight: 700; width: 100%; padding: 4px; border-radius: 5px; font-family: inherit;
-            -webkit-appearance: none; /* Quita estilos por defecto en iPhone */
+            -webkit-appearance: none;
         }
         
         .hour-time { font-size: 1.1rem; font-weight: 700; color: #666; }
         
-        .main-temp { min-width: 90px; text-align: center; }
+        .main-temp { min-width: 90px; text-align: center; display: flex; flex-direction: column; align-items: center; }
         .temp-val { font-size: 3rem; font-weight: 900; line-height: 1; display: block; }
-        .feel { font-size: 0.8rem; color: #555; font-weight: bold; }
+        /* Sensación térmica más grande y centrada */
+        .feel { font-size: 1.1rem; color: #555; font-weight: bold; margin-top: 2px; }
         
         .weather-icon { flex-grow: 1; text-align: center; font-size: 3.5rem; }
         
@@ -115,7 +115,7 @@ function renderForecast(startTime) {
                 <div class="hour-time-box">${timeContent}</div>
                 <div class="main-temp">
                     <span class="temp-val">${temp}°</span>
-                    <span class="feel">${feel}°S</span>
+                    <span class="feel">${feel}°</span>
                 </div>
                 <div class="weather-icon">${weatherIcons[code] || "🌤️"}</div>
                 <div class="stats">
