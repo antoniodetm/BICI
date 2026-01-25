@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bici Check Alcorcón</title>
+    <style>
+        :root { --p: #2563eb; --warn: #f59e0b; --danger: #ef4444; --safe: #22c55e; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #f1f5f9; margin: 0; padding: 15px; color: #1e293b; }
+        
+        .header { text-align: center; padding: 10px 0; margin-bottom: 5px; }
+        .header h2 { margin: 0; color: #0f172a; font-size: 1.4rem; }
+        
+        .hour-card { background: white; border-radius: 16px; padding: 18px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; border-left: 8px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
+        .hour-time { font-size: 1.3rem; font-weight: 800; color: #475569; min-width: 65px; }
+        
+        .main-info { flex-grow: 1; padding: 0 15px; }
+        .temp { font-size: 1.2rem; font-weight: bold; }
+        .desc { font-size: 0.85rem; color: #64748b; margin-top: 2px; }
+        
+        .stats { text-align: right; font-size: 0.95rem; }
+        .label { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 2px; }
+        .wind { color: var(--p); font-weight: bold; }
+        .rain { color: #0891b2; font-weight: bold; }
+
+        /* Estados de riesgo para ciclistas */
+        .risk-high { border-left-color: var(--danger); }
+        .risk-med { border-left-color: var(--warn); }
+        .risk-low { border-left-color: var(--safe); }
+
+        #loader { text-align: center; padding: 30px; color: var(--p); font-weight: bold; }
+    </style>
+</head>
+<body onload="checkBici()">
+
+<div class="header">
+    <h2>🚲 Ruta Segura</h2>
+    <p style="font-size: 0.8rem; color: #64748b; margin: 5px 0;">Previsión próximas 5 horas (Alcorcón)</p>
+</div>
+
+<div id="loader">Consultando condiciones...</div>
+<div id="forecast-list"></div>
+
+<script>
+// Coordenadas fijas de Alcorcón/Móstoles
+const LAT = 40.33669864725108;
+const LON = -3.8369067073823744;
+
+const weatherIcons = {
+    0: "☀️ Despejado", 1: "🌤️ Casi despejado", 2: "⛅ Nubosidad parcial", 3: "☁️ Cubierto",
+    45: "🌫️ Niebla", 48: "🌫️ Niebla", 51: "🌦️ Llovizna", 61: "🌧️ Lluvia", 80: "🌧️ Chubascos", 95: "⛈️ Tormenta"
+};
+
+async function checkBici() {
+    const loader = document.getElementById('loader');
+    const list = document.getElementById('forecast-list');
+    
+    try {
+        const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&hourly=temperature_2m,apparent_temperature,precipitation_probability,weather_code,wind_speed_10m,wind_gusts_10m&timezone=auto&forecast_days=1`);
+        const data = await response.json();
+        
+        const currentHour = new Date().getHours();
+        list.innerHTML = '';
+        
+        for (let i = currentHour; i < currentHour + 6; i++) {
+            const h = data.hourly;
+            if (!h.time[i]) break;
+
+            const time = h.time[i].split('T')[1];
+            const temp = Math.round(h.temperature_2m[i]);
+            const feel = Math.round(h.apparent_temperature[i]);
+            const rain = h.precipitation_probability[i];
+            const gusts = Math.round(h.wind_gusts_10m[i]);
+            const code = h.weather_code[i];
+            
+            // Lógica de seguridad: Rojo si viento > 35km/h o Lluvia > 40%
+            let riskClass = 'risk-low';
+            if (gusts > 35 || rain > 40) riskClass = 'risk-high';
+            else if (gusts > 22 || rain > 15 || temp < 5) riskClass = 'risk-med';
+
+            list.innerHTML += `
+                <div class="hour-card ${riskClass}">
+                    <div class="hour-time">${time}</div>
+                    <div class="main-info">
+                        <div class="temp">${temp}° <small style="font-weight:normal; color:#64748b; font-size:0.8rem;">(Siente ${feel}°)</small></div>
+                        <div class="desc">${weatherIcons[code] || "🌤️ Tiempo"}</div>
+                    </div>
+                    <div class="stats">
+                        <span class="label">Racha</span>
+                        <span class="wind">${gusts} km/h</span>
+                        <span class="label" style="margin-top:6px">Lluvia</span>
+                        <span class="rain">${rain}%</span>
+                    </div>
+                </div>
+            `;
+        }
+        loader.style.display = 'none';
+    } catch (err) {
+        loader.innerText = "Error al conectar con la estación meteorológica.";
+    }
+}
+</script>
+
+</body>
+</html>
