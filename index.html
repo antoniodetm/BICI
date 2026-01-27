@@ -10,41 +10,50 @@
         
         .phone-container { width: 100%; max-width: 430px; background: #000; height: 100vh; display: flex; flex-direction: column; position: relative; }
         
-        .header { background: #111; padding: 8px; text-align: center; border-bottom: 1px solid #222; }
-        .header h2 { margin: 0; font-size: 0.7rem; letter-spacing: 2px; color: #555; text-transform: uppercase; }
+        .header { background: #111; padding: 12px; text-align: center; border-bottom: 1px solid #222; z-index: 10; }
+        .header h2 { margin: 0; font-size: 0.8rem; letter-spacing: 2px; color: #555; text-transform: uppercase; }
 
-        .content-section { flex-grow: 1; display: none; height: calc(100vh - 110px); }
+        .content-section { flex-grow: 1; display: none; height: calc(100vh - 130px); }
         .active-section { display: flex; flex-direction: column; }
 
         #forecast-list { display: flex; flex-direction: column; height: 100%; justify-content: space-between; }
 
-        /* PADDING REDUCIDO PARA EVITAR SCROLL */
         .hour-card { 
             display: flex; align-items: center; 
-            padding: 10px 8px; /* Reducido al mínimo */
+            padding: 5px 10px; 
             border-bottom: 1px solid #1a1a1a; 
-            border-left: 10px solid #333; 
+            border-left: 14px solid #333; 
             background: #000; 
-            gap: 6px;
-            flex: 1; /* Esto hace que las 5 filas se repartan el espacio exacto */
+            gap: 8px;
+            flex: 1; 
         }
         
-        .hour-time-box { min-width: 60px; }
-        .main-temp { min-width: 70px; text-align: left; }
-        .weather-icon { width: 60px; text-align: left; font-size: 3.2rem; line-height: 1; } 
-        
-        .hour-input { 
-            background: #111; color: #fff; border: 1px solid #333; font-size: 0.9rem; 
-            font-weight: 700; width: 100%; padding: 2px; border-radius: 4px; color-scheme: dark;
-        }
+        .hour-time-box { min-width: 65px; text-align: left; }
+        .main-temp { min-width: 80px; text-align: left; }
+        .weather-icon { width: 65px; text-align: left; font-size: 4rem; line-height: 1; } 
 
-        .hour-time { font-size: 0.9rem; font-weight: 700; color: #666; }
-        .temp-val { font-size: 2.2rem; font-weight: 900; line-height: 0.9; display: block; }
-        .feel { font-size: 1.1rem; color: #888; font-weight: bold; display: block; }
+        /* Input de hora alineado a la izquierda y sin iconos */
+        .hour-input { 
+            background: transparent; 
+            color: #fff; 
+            border: none; 
+            font-size: 1rem; 
+            font-weight: 700; 
+            width: 100%; 
+            padding: 0; 
+            color-scheme: dark;
+            text-align: left;
+            font-family: inherit;
+        }
+        .hour-input::-webkit-calendar-picker-indicator { display: none !important; -webkit-appearance: none; }
+
+        .hour-time { font-size: 1rem; font-weight: 700; color: #fff; text-align: left; }
+        .temp-val { font-size: 2.5rem; font-weight: 900; line-height: 1; display: block; }
+        .feel { font-size: 1.2rem; color: #888; font-weight: bold; margin-top: 2px; display: block; }
         
-        .stats { margin-left: auto; text-align: right; min-width: 85px; }
-        .val { font-size: 1.4rem; font-weight: 900; display: block; line-height: 1; }
-        .label { font-size: 0.6rem; font-weight: 800; color: #444; text-transform: uppercase; }
+        .stats { margin-left: auto; text-align: right; min-width: 95px; }
+        .val { font-size: 1.6rem; font-weight: 900; display: block; line-height: 1; }
+        .label { font-size: 0.65rem; font-weight: 800; color: #444; text-transform: uppercase; }
 
         .wind { color: #3b82f6; }
         .rain { color: #22d3ee; }
@@ -53,11 +62,11 @@
         .risk-med { border-left-color: var(--warn); background: #0f0b02; }
         .risk-low { border-left-color: var(--safe); }
 
-        .nav-bar { display: flex; background: #111; border-top: 1px solid #222; height: 55px; }
-        .nav-btn { flex: 1; border: none; background: none; color: #555; font-size: 0.7rem; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .nav-btn.active { color: #fff; border-top: 2px solid var(--p); }
+        .nav-bar { display: flex; background: #111; border-top: 1px solid #222; height: 65px; padding-bottom:env(safe-area-inset-bottom); }
+        .nav-btn { flex: 1; border: none; background: none; color: #555; font-weight: bold; font-size: 0.75rem; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .nav-btn.active { color: #fff; background: #1a1a1a; border-top: 3px solid var(--p); }
 
-        #loader { text-align: center; padding: 20px; color: #444; }
+        #loader { text-align: center; padding: 50px; color: #444; }
     </style>
 </head>
 <body onload="init()">
@@ -73,8 +82,8 @@
     </div>
 
     <nav class="nav-bar">
-        <button class="nav-btn active" onclick="showView('list', this)"><span>📊 Datos</span></button>
-        <button class="nav-btn" onclick="location.reload()"><span>🔄 Cargar</span></button>
+        <button class="nav-btn active">📊 Datos</button>
+        <button class="nav-btn" onclick="location.reload()">🔄 Cargar</button>
     </nav>
 </div>
 
@@ -124,13 +133,16 @@ function renderForecast(startTime) {
         if (gusts > 35 || rainProb > 40 || rainAmount > 0.8) riskClass = 'risk-high';
         else if (gusts > 22 || rainProb > 15 || rainAmount > 0.1) riskClass = 'risk-med';
 
+        // Solo la primera hora es un input editable
         const timeContent = (i === startIndex) 
             ? `<input type="time" class="hour-input" value="${timeStr}" onchange="renderForecast(this.value)">`
             : `<div class="hour-time">${timeStr}</div>`;
 
         htmlContent += `
             <div class="hour-card ${riskClass}">
-                <div class="hour-time-box">${timeContent}</div>
+                <div class="hour-time-box">
+                    ${timeContent}
+                </div>
                 <div class="main-temp">
                     <span class="temp-val">${temp}°</span>
                     <span class="feel">${feel}°</span>
@@ -138,9 +150,9 @@ function renderForecast(startTime) {
                 <div class="weather-icon">${weatherIcons[code] || "🌤️"}</div>
                 <div class="stats">
                     <span class="label">VIENTO</span>
-                    <span class="val wind">${windSpeed}<small style="font-size:0.6em">(${gusts})</small></span>
+                    <span class="val wind">${windSpeed}<small style="font-size:0.6em; font-weight:normal; opacity:0.7"> (${gusts})</small></span>
                     <span class="label">LLUVIA</span>
-                    <span class="val rain">${rainProb}%<small style="font-size:0.6em">${rainAmount}</small></span>
+                    <span class="val rain">${rainAmount}<small style="font-size:0.6em; font-weight:normal; opacity:0.7">mm ${rainProb}%</small></span>
                 </div>
             </div>`;
     }
