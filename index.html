@@ -56,6 +56,9 @@
 
         .wind { color: #3b82f6; }
         .rain { color: #22d3ee; }
+        
+        /* Estilo unificado para el porcentaje secundario */
+        .prob-style { font-size: 0.6em; font-weight: normal; opacity: 0.7; margin-left: 2px; }
 
         .risk-high { border-left-color: var(--danger); background: #120303; }
         .risk-med { border-left-color: var(--warn); background: #0f0b02; }
@@ -127,10 +130,16 @@ function renderForecast(startTime) {
         const gusts = Math.round(h.wind_gusts_10m[i]);
         const code = h.weather_code[i];
         
-        // Lógica para quitar mm si es 0
-        const rainDisplay = rainValue > 0 
-            ? `${rainValue.toFixed(1)}<small style="font-size:0.6em; font-weight:normal; opacity:0.7">mm ${rainProb}%</small>`
-            : (rainProb > 0 ? `${rainProb}%` : '--');
+        // Lógica de lluvia: mm a la izquierda (solo si > 0), % siempre igual a la derecha
+        let rainHTML = "";
+        if (rainValue > 0) {
+            rainHTML = `${rainValue.toFixed(1)}<small class="prob-style">mm ${rainProb}%</small>`;
+        } else {
+            // Si no hay mm, mostramos el % en el tamaño grande pero con el estilo del mm para mantener coherencia,
+            // o simplemente el porcentaje solo. 
+            // Para que el % mantenga el tamaño pequeño solicitado, lo ponemos así:
+            rainHTML = rainProb > 0 ? `<span style="font-size:0.9em">--</span><small class="prob-style">${rainProb}%</small>` : "--";
+        }
 
         let riskClass = 'risk-low';
         if (gusts > 35 || rainProb > 40 || rainValue > 0.8) riskClass = 'risk-high';
@@ -152,7 +161,7 @@ function renderForecast(startTime) {
                     <span class="label">VIENTO</span>
                     <span class="val wind">${windSpeed}<small style="font-size:0.6em; font-weight:normal; opacity:0.7"> (${gusts})</small></span>
                     <span class="label">LLUVIA</span>
-                    <span class="val rain">${rainDisplay}</span>
+                    <span class="val rain">${rainHTML}</span>
                 </div>
             </div>`;
     }
