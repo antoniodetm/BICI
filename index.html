@@ -6,40 +6,45 @@
     <title>BICI PLANNER 5H - ALCORCÓN</title>
     <style>
         :root { --p: #2563eb; --warn: #f59e0b; --danger: #ef4444; --safe: #22c55e; }
-        body { background: #1a1a1a; margin: 0; padding: 0; display: flex; justify-content: center; color: #fff; font-family: ui-sans-serif, system-ui, sans-serif; overflow: hidden; }
+        body { background: #1a1a1a; margin: 0; padding: 0; display: flex; justify-content: center; color: #fff; font-family: ui-sans-serif, system-ui, sans-serif; overflow: hidden; height: 100vh; }
         
         .phone-container { width: 100%; max-width: 430px; background: #000; height: 100vh; display: flex; flex-direction: column; position: relative; }
         
-        .header { background: #111; padding: 12px; text-align: center; border-bottom: 1px solid #222; z-index: 10; }
-        .header h2 { margin: 0; font-size: 0.8rem; letter-spacing: 2px; color: #555; text-transform: uppercase; }
+        .header { background: #111; padding: 8px; text-align: center; border-bottom: 1px solid #222; }
+        .header h2 { margin: 0; font-size: 0.7rem; letter-spacing: 2px; color: #555; text-transform: uppercase; }
 
-        .content-section { flex-grow: 1; overflow-y: auto; display: none; }
-        .active-section { display: block; }
+        .content-section { flex-grow: 1; display: none; height: calc(100vh - 110px); }
+        .active-section { display: flex; flex-direction: column; }
 
-        #weather-map { width: 100%; height: 100%; border: none; }
+        #forecast-list { display: flex; flex-direction: column; height: 100%; justify-content: space-between; }
 
-        .hour-card { display: flex; align-items: center; padding: 20px 10px; border-bottom: 1px solid #1a1a1a; border-left: 14px solid #333; background: #000; gap: 8px; }
+        /* PADDING REDUCIDO PARA EVITAR SCROLL */
+        .hour-card { 
+            display: flex; align-items: center; 
+            padding: 10px 8px; /* Reducido al mínimo */
+            border-bottom: 1px solid #1a1a1a; 
+            border-left: 10px solid #333; 
+            background: #000; 
+            gap: 6px;
+            flex: 1; /* Esto hace que las 5 filas se repartan el espacio exacto */
+        }
         
-        .hour-time-box { min-width: 65px; }
-        .main-temp { min-width: 80px; text-align: left; }
-        /* Icono más grande y con más espacio */
-        .weather-icon { width: 65px; text-align: left; font-size: 4rem; line-height: 1; } 
+        .hour-time-box { min-width: 60px; }
+        .main-temp { min-width: 70px; text-align: left; }
+        .weather-icon { width: 60px; text-align: left; font-size: 3.2rem; line-height: 1; } 
         
         .hour-input { 
-            background: #111; color: #fff; border: 1px solid #333; font-size: 1rem; 
-            font-weight: 700; width: 100%; padding: 4px; border-radius: 5px; color-scheme: dark; 
-            appearance: none; -webkit-appearance: none;
+            background: #111; color: #fff; border: 1px solid #333; font-size: 0.9rem; 
+            font-weight: 700; width: 100%; padding: 2px; border-radius: 4px; color-scheme: dark;
         }
-        .hour-input::-webkit-calendar-picker-indicator { display: none !important; }
 
-        .hour-time { font-size: 1rem; font-weight: 700; color: #666; }
-        .temp-val { font-size: 2.5rem; font-weight: 900; line-height: 1; display: block; }
-        /* Sensación térmica más grande y clara */
-        .feel { font-size: 1.2rem; color: #888; font-weight: bold; margin-top: 2px; display: block; }
+        .hour-time { font-size: 0.9rem; font-weight: 700; color: #666; }
+        .temp-val { font-size: 2.2rem; font-weight: 900; line-height: 0.9; display: block; }
+        .feel { font-size: 1.1rem; color: #888; font-weight: bold; display: block; }
         
-        .stats { margin-left: auto; text-align: right; min-width: 95px; }
-        .val { font-size: 1.6rem; font-weight: 900; display: block; line-height: 1; }
-        .label { font-size: 0.65rem; font-weight: 800; color: #444; text-transform: uppercase; }
+        .stats { margin-left: auto; text-align: right; min-width: 85px; }
+        .val { font-size: 1.4rem; font-weight: 900; display: block; line-height: 1; }
+        .label { font-size: 0.6rem; font-weight: 800; color: #444; text-transform: uppercase; }
 
         .wind { color: #3b82f6; }
         .rain { color: #22d3ee; }
@@ -48,12 +53,11 @@
         .risk-med { border-left-color: var(--warn); background: #0f0b02; }
         .risk-low { border-left-color: var(--safe); }
 
-        .nav-bar { display: flex; background: #111; border-top: 1px solid #222; height: 65px; padding-bottom:env(safe-area-inset-bottom); }
-        .nav-btn { flex: 1; border: none; background: none; color: #555; font-weight: bold; font-size: 0.75rem; text-transform: uppercase; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
-        .nav-btn.active { color: #fff; background: #1a1a1a; border-top: 3px solid var(--p); }
-        .nav-icon { font-size: 1.2rem; }
+        .nav-bar { display: flex; background: #111; border-top: 1px solid #222; height: 55px; }
+        .nav-btn { flex: 1; border: none; background: none; color: #555; font-size: 0.7rem; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .nav-btn.active { color: #fff; border-top: 2px solid var(--p); }
 
-        #loader { text-align: center; padding: 50px; color: #444; }
+        #loader { text-align: center; padding: 20px; color: #444; }
     </style>
 </head>
 <body onload="init()">
@@ -68,19 +72,9 @@
         <div id="forecast-list"></div>
     </div>
 
-    <div id="section-map" class="content-section">
-        <iframe id="weather-map" src="https://embed.windy.com/embed2.html?lat=40.342&lon=-3.831&zoom=10&level=surface&overlay=rain&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1" frameborder="0"></iframe>
-    </div>
-
     <nav class="nav-bar">
-        <button class="nav-btn active" onclick="showView('list', this)">
-            <span class="nav-icon">📊</span>
-            <span>Datos</span>
-        </button>
-        <button class="nav-btn" onclick="showView('map', this)">
-            <span class="nav-icon">🗺️</span>
-            <span>Mapa</span>
-        </button>
+        <button class="nav-btn active" onclick="showView('list', this)"><span>📊 Datos</span></button>
+        <button class="nav-btn" onclick="location.reload()"><span>🔄 Cargar</span></button>
     </nav>
 </div>
 
@@ -103,16 +97,7 @@ async function init() {
         const currentHour = now.getHours().toString().padStart(2, '0') + ":00";
         renderForecast(currentHour);
         document.getElementById('loader').style.display = 'none';
-    } catch (e) { document.getElementById('loader').innerText = "ERROR API"; }
-}
-
-function showView(view, btn) {
-    document.getElementById('section-list').classList.remove('active-section');
-    document.getElementById('section-map').classList.remove('active-section');
-    document.getElementById('section-' + view).classList.add('active-section');
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('view-title').innerText = view === 'list' ? 'DATOS ALCORCÓN' : 'RADAR LLUVIA';
+    } catch (e) { document.getElementById('loader').innerText = "ERROR"; }
 }
 
 function renderForecast(startTime) {
@@ -136,8 +121,8 @@ function renderForecast(startTime) {
         const code = h.weather_code[i];
         
         let riskClass = 'risk-low';
-        if (gusts > 35 || rainProb > 40 || rainAmount > 1.0) riskClass = 'risk-high';
-        else if (gusts > 22 || rainProb > 15 || rainAmount > 0.2) riskClass = 'risk-med';
+        if (gusts > 35 || rainProb > 40 || rainAmount > 0.8) riskClass = 'risk-high';
+        else if (gusts > 22 || rainProb > 15 || rainAmount > 0.1) riskClass = 'risk-med';
 
         const timeContent = (i === startIndex) 
             ? `<input type="time" class="hour-input" value="${timeStr}" onchange="renderForecast(this.value)">`
@@ -153,9 +138,9 @@ function renderForecast(startTime) {
                 <div class="weather-icon">${weatherIcons[code] || "🌤️"}</div>
                 <div class="stats">
                     <span class="label">VIENTO</span>
-                    <span class="val wind">${windSpeed}<small style="font-size: 0.6em; opacity: 0.7; font-weight: normal;"> (${gusts})</small></span>
+                    <span class="val wind">${windSpeed}<small style="font-size:0.6em">(${gusts})</small></span>
                     <span class="label">LLUVIA</span>
-                    <span class="val rain">${rainProb}%<small style="font-size: 0.6em; opacity: 0.7; font-weight: normal;"> ${rainAmount}mm</small></span>
+                    <span class="val rain">${rainProb}%<small style="font-size:0.6em">${rainAmount}</small></span>
                 </div>
             </div>`;
     }
