@@ -32,7 +32,6 @@
         .main-temp { min-width: 80px; text-align: left; }
         .weather-icon { width: 65px; text-align: left; font-size: 4rem; line-height: 1; } 
 
-        /* Input de hora alineado a la izquierda y sin iconos */
         .hour-input { 
             background: transparent; 
             color: #fff; 
@@ -112,37 +111,38 @@ async function init() {
 function renderForecast(startTime) {
     const list = document.getElementById('forecast-list');
     let htmlContent = '';
-    const times = weatherData.hourly.time;
+    const h = weatherData.hourly;
     const normalizedTime = startTime.includes(':') ? startTime.split(':')[0] + ":00" : startTime;
-    let startIndex = times.findIndex(t => t.includes(`T${normalizedTime}`));
+    let startIndex = h.time.findIndex(t => t.includes(`T${normalizedTime}`));
     if (startIndex === -1) startIndex = 0;
 
     for (let i = startIndex; i < startIndex + 5; i++) {
-        const h = weatherData.hourly;
-        if (!h || !h.time[i]) break;
+        if (!h.time[i]) break;
         const timeStr = h.time[i].split('T')[1];
         const temp = Math.round(h.temperature_2m[i]);
         const feel = Math.round(h.apparent_temperature[i]);
         const rainProb = h.precipitation_probability[i];
-        const rainAmount = h.precipitation[i].toFixed(1);
+        const rainValue = h.precipitation[i];
         const windSpeed = Math.round(h.wind_speed_10m[i]); 
         const gusts = Math.round(h.wind_gusts_10m[i]);
         const code = h.weather_code[i];
         
-        let riskClass = 'risk-low';
-        if (gusts > 35 || rainProb > 40 || rainAmount > 0.8) riskClass = 'risk-high';
-        else if (gusts > 22 || rainProb > 15 || rainAmount > 0.1) riskClass = 'risk-med';
+        // Lógica para quitar mm si es 0
+        const rainDisplay = rainValue > 0 
+            ? `${rainValue.toFixed(1)}<small style="font-size:0.6em; font-weight:normal; opacity:0.7">mm ${rainProb}%</small>`
+            : (rainProb > 0 ? `${rainProb}%` : '--');
 
-        // Solo la primera hora es un input editable
+        let riskClass = 'risk-low';
+        if (gusts > 35 || rainProb > 40 || rainValue > 0.8) riskClass = 'risk-high';
+        else if (gusts > 22 || rainProb > 15 || rainValue > 0.1) riskClass = 'risk-med';
+
         const timeContent = (i === startIndex) 
             ? `<input type="time" class="hour-input" value="${timeStr}" onchange="renderForecast(this.value)">`
             : `<div class="hour-time">${timeStr}</div>`;
 
         htmlContent += `
             <div class="hour-card ${riskClass}">
-                <div class="hour-time-box">
-                    ${timeContent}
-                </div>
+                <div class="hour-time-box">${timeContent}</div>
                 <div class="main-temp">
                     <span class="temp-val">${temp}°</span>
                     <span class="feel">${feel}°</span>
@@ -152,7 +152,7 @@ function renderForecast(startTime) {
                     <span class="label">VIENTO</span>
                     <span class="val wind">${windSpeed}<small style="font-size:0.6em; font-weight:normal; opacity:0.7"> (${gusts})</small></span>
                     <span class="label">LLUVIA</span>
-                    <span class="val rain">${rainAmount}<small style="font-size:0.6em; font-weight:normal; opacity:0.7">mm ${rainProb}%</small></span>
+                    <span class="val rain">${rainDisplay}</span>
                 </div>
             </div>`;
     }
