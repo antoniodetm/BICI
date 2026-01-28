@@ -30,7 +30,7 @@
         
         .hour-time-box { min-width: 65px; text-align: left; }
         .main-temp { min-width: 80px; text-align: left; }
-        .weather-icon { width: 65px; text-align: left; font-size: 4rem; line-height: 1; } 
+        .weather-icon { width: 65px; text-align: left; font-size: 3.5rem; line-height: 1; } 
 
         .hour-input { 
             background: transparent; 
@@ -57,15 +57,17 @@
         .wind { color: #3b82f6; }
         .rain { color: #22d3ee; }
         
-        /* Estilo unificado para el porcentaje secundario */
         .prob-style { font-size: 0.6em; font-weight: normal; opacity: 0.7; margin-left: 2px; }
 
         .risk-high { border-left-color: var(--danger); background: #120303; }
         .risk-med { border-left-color: var(--warn); background: #0f0b02; }
         .risk-low { border-left-color: var(--safe); }
 
+        /* Contenedor del Mapa */
+        #section-map { width: 100%; height: calc(100vh - 130px); background: #000; overflow: hidden; }
+
         .nav-bar { display: flex; background: #111; border-top: 1px solid #222; height: 65px; padding-bottom:env(safe-area-inset-bottom); }
-        .nav-btn { flex: 1; border: none; background: none; color: #555; font-weight: bold; font-size: 0.75rem; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .nav-btn { flex: 1; border: none; background: none; color: #555; font-weight: bold; font-size: 0.75rem; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
         .nav-btn.active { color: #fff; background: #1a1a1a; border-top: 3px solid var(--p); }
 
         #loader { text-align: center; padding: 50px; color: #444; }
@@ -83,9 +85,17 @@
         <div id="forecast-list"></div>
     </div>
 
+    <div id="section-map" class="content-section">
+        <iframe 
+            id="windy-frame"
+            src="https://embed.windy.com/embed2.html?lat=40.342&lon=-3.831&zoom=11&level=surface&overlay=rain&product=ecmwf&menu=&message=&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km/h&metricTemp=%C2%B0C&radarRange=-1" 
+            style="width:100%; height:100%; border:none;">
+        </iframe>
+    </div>
+
     <nav class="nav-bar">
-        <button class="nav-btn active">📊 Datos</button>
-        <button class="nav-btn" onclick="location.reload()">🔄 Cargar</button>
+        <button id="btn-datos" class="nav-btn active" onclick="showSection('datos')">📊 Datos</button>
+        <button id="btn-mapa" class="nav-btn" onclick="showSection('mapa')">🌍 Mapa</button>
     </nav>
 </div>
 
@@ -108,15 +118,42 @@ async function init() {
         const currentHour = now.getHours().toString().padStart(2, '0') + ":00";
         renderForecast(currentHour);
         document.getElementById('loader').style.display = 'none';
-    } catch (e) { document.getElementById('loader').innerText = "ERROR"; }
+    } catch (e) { 
+        document.getElementById('loader').innerText = "ERROR DE CONEXIÓN"; 
+    }
+}
+
+function showSection(section) {
+    const listSection = document.getElementById('section-list');
+    const mapSection = document.getElementById('section-map');
+    const btnDatos = document.getElementById('btn-datos');
+    const btnMapa = document.getElementById('btn-mapa');
+    const title = document.getElementById('view-title');
+
+    if (section === 'datos') {
+        listSection.style.display = 'flex';
+        mapSection.style.display = 'none';
+        btnDatos.classList.add('active');
+        btnMapa.classList.remove('active');
+        title.innerText = "DATOS ALCORCÓN";
+    } else {
+        listSection.style.display = 'none';
+        mapSection.style.display = 'block';
+        btnDatos.classList.remove('active');
+        btnMapa.classList.add('active');
+        title.innerText = "RADAR ALCORCÓN";
+    }
 }
 
 function renderForecast(startTime) {
     const list = document.getElementById('forecast-list');
     let htmlContent = '';
     const h = weatherData.hourly;
+    
+    // Normalizar la hora seleccionada
     const normalizedTime = startTime.includes(':') ? startTime.split(':')[0] + ":00" : startTime;
     let startIndex = h.time.findIndex(t => t.includes(`T${normalizedTime}`));
+    
     if (startIndex === -1) startIndex = 0;
 
     for (let i = startIndex; i < startIndex + 5; i++) {
@@ -130,21 +167,18 @@ function renderForecast(startTime) {
         const gusts = Math.round(h.wind_gusts_10m[i]);
         const code = h.weather_code[i];
         
-        // Lógica de lluvia: mm a la izquierda (solo si > 0), % siempre igual a la derecha
         let rainHTML = "";
         if (rainValue > 0) {
             rainHTML = `${rainValue.toFixed(1)}<small class="prob-style">mm ${rainProb}%</small>`;
         } else {
-            // Si no hay mm, mostramos el % en el tamaño grande pero con el estilo del mm para mantener coherencia,
-            // o simplemente el porcentaje solo. 
-            // Para que el % mantenga el tamaño pequeño solicitado, lo ponemos así:
-            rainHTML = rainProb > 0 ? `<span style="font-size:0.9em">--</span><small class="prob-style">${rainProb}%</small>` : "--";
+            rainHTML = rainProb > 0 ? `<span style="font-size:0.9em">--</span><small class="prob-style">${rainProb}%</small>` : "0%";
         }
 
         let riskClass = 'risk-low';
         if (gusts > 35 || rainProb > 40 || rainValue > 0.8) riskClass = 'risk-high';
         else if (gusts > 22 || rainProb > 15 || rainValue > 0.1) riskClass = 'risk-med';
 
+        // Solo la primera fila permite cambiar la hora
         const timeContent = (i === startIndex) 
             ? `<input type="time" class="hour-input" value="${timeStr}" onchange="renderForecast(this.value)">`
             : `<div class="hour-time">${timeStr}</div>`;
