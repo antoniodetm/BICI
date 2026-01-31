@@ -29,37 +29,29 @@
         .hour-card { 
             display: flex; 
             align-items: center; 
-            padding: 0 10px; 
+            padding: 0 15px; /* Un poco más de aire en los bordes */
             border-bottom: 1px solid rgba(255, 255, 255, 0.4); 
             border-left: 18px solid #333; 
             background: #000; 
             flex: 1; 
             width: 100%;
-            gap: 0; /* Eliminamos espacio entre flex items */
         }
         
+        /* REPARTO DE ESPACIO PARA PEGAR STATS A LA DERECHA */
         .hour-time-box { width: 18%; }
+        .main-temp { width: 22%; display: flex; flex-direction: column; align-items: flex-start; padding-left: 5px; }
         
-        .main-temp { 
-            width: 22%; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: flex-start;
-            padding-left: 10px; 
-        }
-
-        /* ICONO PEGADO A LA DERECHA */
+        /* El icono ocupa el centro */
         .weather-icon { 
-            width: 20%; 
-            text-align: right; 
+            flex-grow: 1; /* Ocupa el espacio sobrante para empujar las stats */
+            text-align: center; 
             font-size: 3.8rem; 
-            padding-right: 8px; /* Espacio mínimo con las stats */
         } 
 
-        /* STATS ALINEADAS A LA IZQUIERDA PARA PEGARSE AL ICONO */
+        /* BLOQUE PEGADO A LA DERECHA */
         .stats { 
             width: 40%; 
-            text-align: left; 
+            text-align: right; /* Alineación total a la derecha */
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
@@ -149,10 +141,7 @@ function renderForecast(startTime) {
         let rainBlock = '';
         if (prob > 0 || rain > 0) {
             let displayRain = rain > 0 ? rain.toFixed(1) : prob + "%";
-            rainBlock = `
-                <span class="label">LLUVIA</span>
-                <span class="val rain-val">${displayRain}</span>
-            `;
+            rainBlock = `<span class="label">LLUVIA</span><span class="val rain-val">${displayRain}</span>`;
         }
 
         html += `
