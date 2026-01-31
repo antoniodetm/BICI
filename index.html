@@ -2,82 +2,142 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BICI PLANNER 5H - ALCORCÓN</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BICI PLANNER PRO - ALCORCÓN</title>
     <style>
         :root { --p: #2563eb; --warn: #f59e0b; --danger: #ef4444; --safe: #22c55e; }
-        body { background: #1a1a1a; margin: 0; padding: 0; display: flex; justify-content: center; color: #fff; font-family: ui-sans-serif, system-ui, sans-serif; overflow: hidden; height: 100vh; }
         
-        .phone-container { width: 100%; max-width: 430px; background: #000; height: 100vh; display: flex; flex-direction: column; position: relative; }
+        /* Ajuste para ocupar el 100% de resoluciones altas */
+        body { 
+            background: #000; 
+            margin: 0; 
+            padding: 0; 
+            display: flex; 
+            justify-content: center; 
+            color: #fff; 
+            font-family: ui-sans-serif, system-ui, sans-serif; 
+            overflow: hidden; 
+            height: 100vh;
+            width: 100vw;
+        }
         
-        .header { background: #111; padding: 12px; text-align: center; border-bottom: 1px solid #222; z-index: 10; }
-        .header h2 { margin: 0; font-size: 0.8rem; letter-spacing: 2px; color: #555; text-transform: uppercase; }
+        .phone-container { 
+            width: 100%; 
+            max-width: 100%; /* Ahora ignora el límite de 430px */
+            background: #000; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+        }
+        
+        .header { 
+            background: #111; 
+            padding: 20px; 
+            text-align: center; 
+            border-bottom: 1px solid #222; 
+            z-index: 10; 
+        }
+        .header h2 { 
+            margin: 0; 
+            font-size: 1.2rem; 
+            letter-spacing: 4px; 
+            color: #888; 
+            text-transform: uppercase; 
+            font-weight: 900; 
+        }
 
-        .content-section { flex-grow: 1; display: none; height: calc(100vh - 130px); }
+        .content-section { flex-grow: 1; display: none; height: calc(100vh - 160px); }
         .active-section { display: flex; flex-direction: column; }
 
-        #forecast-list { display: flex; flex-direction: column; height: 100%; justify-content: space-between; }
+        #forecast-list { 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+            justify-content: stretch; 
+        }
 
         .hour-card { 
-            display: flex; align-items: center; 
-            padding: 5px 10px; 
+            display: flex; 
+            align-items: center; 
+            padding: 10px 25px; 
             border-bottom: 1px solid #1a1a1a; 
-            border-left: 14px solid #333; 
+            border-left: 25px solid #333; 
             background: #000; 
-            gap: 8px;
+            gap: 20px;
             flex: 1; 
         }
         
-        .hour-time-box { min-width: 65px; text-align: left; }
-        .main-temp { min-width: 80px; text-align: left; }
-        .weather-icon { width: 65px; text-align: left; font-size: 3.5rem; line-height: 1; } 
+        .hour-time-box { min-width: 100px; text-align: left; }
+        .main-temp { min-width: 140px; text-align: left; }
+        .weather-icon { width: 110px; text-align: center; font-size: 5.5rem; line-height: 1; } 
 
         .hour-input { 
             background: transparent; 
             color: #fff; 
             border: none; 
-            font-size: 1rem; 
-            font-weight: 700; 
+            font-size: 1.8rem; 
+            font-weight: 900; 
             width: 100%; 
             padding: 0; 
             color-scheme: dark;
-            text-align: left;
             font-family: inherit;
         }
-        .hour-input::-webkit-calendar-picker-indicator { display: none !important; -webkit-appearance: none; }
+        .hour-input::-webkit-calendar-picker-indicator { display: none !important; }
 
-        .hour-time { font-size: 1rem; font-weight: 700; color: #fff; text-align: left; }
-        .temp-val { font-size: 2.5rem; font-weight: 900; line-height: 1; display: block; }
-        .feel { font-size: 1.2rem; color: #888; font-weight: bold; margin-top: 2px; display: block; }
+        .hour-time { font-size: 1.8rem; font-weight: 900; color: #fff; }
+        .temp-val { font-size: 4.5rem; font-weight: 900; line-height: 0.85; display: block; letter-spacing: -2px; }
+        .feel { font-size: 1.8rem; color: #aaa; font-weight: bold; margin-top: 5px; display: block; }
         
-        .stats { margin-left: auto; text-align: right; min-width: 95px; }
-        .val { font-size: 1.6rem; font-weight: 900; display: block; line-height: 1; }
-        .label { font-size: 0.65rem; font-weight: 800; color: #444; text-transform: uppercase; }
+        .stats { margin-left: auto; text-align: right; min-width: 180px; display: flex; flex-direction: column; justify-content: center; }
+        .val { font-size: 3.2rem; font-weight: 900; display: block; line-height: 0.8; margin-bottom: 8px; }
+        .label { font-size: 1rem; font-weight: 900; color: #555; text-transform: uppercase; line-height: 1; margin-bottom: 4px; }
 
-        .wind { color: #3b82f6; }
+        /* Colores Viento con Intensidad */
+        .wind-low { color: #22c55e; }
+        .wind-mod { color: #f59e0b; }
+        .wind-high { color: #ef4444; }
+        .wind-extreme { color: #ec4899; }
+        
         .rain { color: #22d3ee; }
-        
-        .prob-style { font-size: 0.6em; font-weight: normal; opacity: 0.7; margin-left: 2px; }
+        .prob-style { font-size: 0.5em; font-weight: 900; opacity: 0.8; margin-left: 5px; }
 
-        .risk-high { border-left-color: var(--danger); background: #120303; }
-        .risk-med { border-left-color: var(--warn); background: #0f0b02; }
+        .risk-high { border-left-color: var(--danger); background: #1a0505; }
+        .risk-med { border-left-color: var(--warn); background: #110d02; }
         .risk-low { border-left-color: var(--safe); }
 
-        /* Contenedor del Mapa */
-        #section-map { width: 100%; height: calc(100vh - 130px); background: #000; overflow: hidden; }
+        #section-map { width: 100%; height: calc(100vh - 160px); background: #000; overflow: hidden; }
 
-        .nav-bar { display: flex; background: #111; border-top: 1px solid #222; height: 65px; padding-bottom:env(safe-area-inset-bottom); }
-        .nav-btn { flex: 1; border: none; background: none; color: #555; font-weight: bold; font-size: 0.75rem; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
-        .nav-btn.active { color: #fff; background: #1a1a1a; border-top: 3px solid var(--p); }
+        .nav-bar { 
+            display: flex; 
+            background: #111; 
+            border-top: 1px solid #222; 
+            height: 90px; 
+            padding-bottom: env(safe-area-inset-bottom); 
+        }
+        .nav-btn { 
+            flex: 1; 
+            border: none; 
+            background: none; 
+            color: #666; 
+            font-weight: 900; 
+            font-size: 1.1rem; 
+            text-transform: uppercase; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .nav-btn.active { color: #fff; background: #1a1a1a; border-top: 6px solid var(--p); }
 
-        #loader { text-align: center; padding: 50px; color: #444; }
+        #loader { text-align: center; padding: 100px; color: #444; font-weight: bold; font-size: 2rem; }
     </style>
 </head>
 <body onload="init()">
 
 <div class="phone-container">
     <div class="header">
-        <h2 id="view-title">DATOS ALCORCÓN</h2>
+        <h2 id="view-title">ALCORCÓN BICI PRO</h2>
     </div>
 
     <div id="section-list" class="content-section active-section">
@@ -94,8 +154,8 @@
     </div>
 
     <nav class="nav-bar">
-        <button id="btn-datos" class="nav-btn active" onclick="showSection('datos')">📊 Datos</button>
-        <button id="btn-mapa" class="nav-btn" onclick="showSection('mapa')">🌍 Mapa</button>
+        <button id="btn-datos" class="nav-btn active" onclick="showSection('datos')">📊 DATOS</button>
+        <button id="btn-mapa" class="nav-btn" onclick="showSection('mapa')">🌍 MAPA</button>
     </nav>
 </div>
 
@@ -119,7 +179,7 @@ async function init() {
         renderForecast(currentHour);
         document.getElementById('loader').style.display = 'none';
     } catch (e) { 
-        document.getElementById('loader').innerText = "ERROR DE CONEXIÓN"; 
+        document.getElementById('loader').innerText = "ERROR API"; 
     }
 }
 
@@ -135,13 +195,13 @@ function showSection(section) {
         mapSection.style.display = 'none';
         btnDatos.classList.add('active');
         btnMapa.classList.remove('active');
-        title.innerText = "DATOS ALCORCÓN";
+        title.innerText = "ALCORCÓN BICI PRO";
     } else {
         listSection.style.display = 'none';
         mapSection.style.display = 'block';
         btnDatos.classList.remove('active');
         btnMapa.classList.add('active');
-        title.innerText = "RADAR ALCORCÓN";
+        title.innerText = "RADAR EN VIVO";
     }
 }
 
@@ -150,7 +210,6 @@ function renderForecast(startTime) {
     let htmlContent = '';
     const h = weatherData.hourly;
     
-    // Normalizar la hora seleccionada
     const normalizedTime = startTime.includes(':') ? startTime.split(':')[0] + ":00" : startTime;
     let startIndex = h.time.findIndex(t => t.includes(`T${normalizedTime}`));
     
@@ -169,16 +228,21 @@ function renderForecast(startTime) {
         
         let rainHTML = "";
         if (rainValue > 0) {
-            rainHTML = `${rainValue.toFixed(1)}<small class="prob-style">mm ${rainProb}%</small>`;
+            rainHTML = `${rainValue.toFixed(1)}<small class="prob-style">${rainProb}%</small>`;
         } else {
             rainHTML = rainProb > 0 ? `<span style="font-size:0.9em">--</span><small class="prob-style">${rainProb}%</small>` : "0%";
         }
+
+        // Lógica de colores para el viento
+        let windColorClass = 'wind-low';
+        if (gusts > 50 || windSpeed > 30) windColorClass = 'wind-extreme';
+        else if (gusts > 35 || windSpeed > 20) windColorClass = 'wind-high';
+        else if (gusts > 22 || windSpeed > 12) windColorClass = 'wind-mod';
 
         let riskClass = 'risk-low';
         if (gusts > 35 || rainProb > 40 || rainValue > 0.8) riskClass = 'risk-high';
         else if (gusts > 22 || rainProb > 15 || rainValue > 0.1) riskClass = 'risk-med';
 
-        // Solo la primera fila permite cambiar la hora
         const timeContent = (i === startIndex) 
             ? `<input type="time" class="hour-input" value="${timeStr}" onchange="renderForecast(this.value)">`
             : `<div class="hour-time">${timeStr}</div>`;
@@ -192,8 +256,8 @@ function renderForecast(startTime) {
                 </div>
                 <div class="weather-icon">${weatherIcons[code] || "🌤️"}</div>
                 <div class="stats">
-                    <span class="label">VIENTO</span>
-                    <span class="val wind">${windSpeed}<small style="font-size:0.6em; font-weight:normal; opacity:0.7"> (${gusts})</small></span>
+                    <span class="label">VIENTO (KM/H)</span>
+                    <span class="val wind ${windColorClass}">${windSpeed}<small style="font-size:0.45em; font-weight:900; opacity:0.7"> (${gusts})</small></span>
                     <span class="label">LLUVIA</span>
                     <span class="val rain">${rainHTML}</span>
                 </div>
