@@ -74,6 +74,9 @@
         .risk-med { border-left-color: var(--warn); background: #110d02; }
         .risk-low { border-left-color: var(--safe); }
 
+        /* Estilo específico para los mm pequeños */
+        .mm-small { font-size: 0.35em; opacity: 0.6; vertical-align: middle; margin-right: 4px; }
+
         .nav-bar { display: flex; background: #111; height: 85px; border-top: 1px solid #222; }
         .nav-btn { flex: 1; border: none; background: none; color: #444; font-weight: 900; font-size: 1rem; text-transform: uppercase; }
         .nav-btn.active { color: #fff; border-top: 4px solid var(--p); background: #1a1a1a; }
@@ -142,11 +145,15 @@ function renderForecast(startTime) {
         let wCol = wind > 30 ? 'wind-extreme' : wind > 20 ? 'wind-high' : wind > 12 ? 'wind-mod' : 'wind-low';
         let risk = (gusts > 35 || prob > 40 || rain > 0.8) ? 'risk-high' : (gusts > 22 || prob > 15 || rain > 0.1) ? 'risk-med' : 'risk-low';
 
-        // Lógica de lluvia solicitada: mm a la izquierda, prob a la derecha. 
+        // Lógica de lluvia: mm (pequeños) a la izquierda, probabilidad a la derecha. 
         // Oculta 0mm y 0%.
         let rainDisplay = '';
-        if (rain > 0) rainDisplay += `${rain.toFixed(1)}<small style="font-size:0.4em; opacity:0.6">mm</small> `;
-        if (prob > 0) rainDisplay += `${prob}%`;
+        if (rain > 0) {
+            rainDisplay += `<span class="mm-small">${rain.toFixed(1)}mm</span>`;
+        }
+        if (prob > 0) {
+            rainDisplay += `${prob}%`;
+        }
 
         let rainBlock = (rainDisplay !== '') ? `
             <span class="label">LLUVIA</span>
