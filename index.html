@@ -30,8 +30,8 @@
             display: flex; 
             align-items: center; 
             padding: 0 15px; 
-            border-bottom: 1px solid rgba(255, 255, 255, 0.4); 
-            border-left: 18px solid #333; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
+            border-left: 4px solid #333; /* BARRA MUCHO MÁS FINA (Antes 18px) */
             background: #000; 
             flex: 1; 
             width: 100%;
@@ -74,8 +74,8 @@
         .risk-med { border-left-color: var(--warn); background: #110d02; }
         .risk-low { border-left-color: var(--safe); }
 
-        /* Estilo específico para los mm pequeños */
-        .mm-small { font-size: 0.35em; opacity: 0.6; vertical-align: middle; margin-right: 4px; }
+        /* Estilo para los mm mucho más pequeños */
+        .mm-small { font-size: 0.3em; opacity: 0.5; vertical-align: middle; margin-right: 4px; font-weight: 400; }
 
         .nav-bar { display: flex; background: #111; height: 85px; border-top: 1px solid #222; }
         .nav-btn { flex: 1; border: none; background: none; color: #444; font-weight: 900; font-size: 1rem; text-transform: uppercase; }
@@ -101,13 +101,10 @@ const LAT = 40.342, LON = -3.831;
 let weatherData = null;
 
 const weatherIcons = {
-    0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️", 
-    45: "🌫️", 48: "🌫️", 
-    51: "🌦️", 53: "🌦️", 55: "🌧️", 
-    61: "🌧️", 63: "🌧️", 65: "🌧️", 
-    71: "❄️", 73: "❄️", 75: "❄️",
-    77: "❄️", 80: "🌦️", 81: "🌧️", 82: "⛈️",
-    85: "❄️", 86: "❄️", 95: "⛈️", 96: "⛈️", 99: "⛈️"
+    0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️", 45: "🌫️", 48: "🌫️", 
+    51: "🌦️", 53: "🌦️", 55: "🌧️", 61: "🌧️", 63: "🌧️", 65: "🌧️", 
+    71: "❄️", 73: "❄️", 75: "❄️", 77: "❄️", 80: "🌦️", 81: "🌧️", 
+    82: "⛈️", 85: "❄️", 86: "❄️", 95: "⛈️", 96: "⛈️", 99: "⛈️"
 };
 
 async function init() {
@@ -145,15 +142,9 @@ function renderForecast(startTime) {
         let wCol = wind > 30 ? 'wind-extreme' : wind > 20 ? 'wind-high' : wind > 12 ? 'wind-mod' : 'wind-low';
         let risk = (gusts > 35 || prob > 40 || rain > 0.8) ? 'risk-high' : (gusts > 22 || prob > 15 || rain > 0.1) ? 'risk-med' : 'risk-low';
 
-        // Lógica de lluvia: mm (pequeños) a la izquierda, probabilidad a la derecha. 
-        // Oculta 0mm y 0%.
         let rainDisplay = '';
-        if (rain > 0) {
-            rainDisplay += `<span class="mm-small">${rain.toFixed(1)}mm</span>`;
-        }
-        if (prob > 0) {
-            rainDisplay += `${prob}%`;
-        }
+        if (rain > 0) rainDisplay += `<span class="mm-small">${rain.toFixed(1)}mm</span>`;
+        if (prob > 0) rainDisplay += `${prob}%`;
 
         let rainBlock = (rainDisplay !== '') ? `
             <span class="label">LLUVIA</span>
