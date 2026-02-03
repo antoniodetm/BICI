@@ -24,14 +24,14 @@
         
         .phone-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
 
-        .header { background: #000; padding: 8px; text-align: center; border-radius: 12px 12px 0 0; }
-        .header h2 { margin: 0; font-size: 1.2rem; color: #fff; text-transform: uppercase; }
+        .header { background: #000; padding: 10px; text-align: center; border-radius: 12px 12px 0 0; }
+        .header h2 { margin: 0; font-size: 1.4rem; color: #fff; text-transform: uppercase; letter-spacing: 1px; }
 
         #forecast-list { 
             flex: 1; 
             display: flex; 
             flex-direction: column; 
-            gap: 4px; 
+            gap: 5px; 
             overflow-y: auto; 
             margin-bottom: 0; 
         }
@@ -40,9 +40,9 @@
             display: grid;
             grid-template-columns: 85px 1fr 1fr 1fr;
             gap: 6px;
-            padding: 8px 10px;
+            padding: 10px;
             border-radius: 15px;
-            min-height: 110px;
+            min-height: 120px;
         }
         
         .risk-low { background-color: var(--bg-safe); }
@@ -56,47 +56,51 @@
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            padding: 4px 2px 6px 2px;
+            padding: 4px 2px 8px 2px;
             color: #fff;
         }
 
         .time-block input, .time-block span { 
             font-family: 'Arial Black', Gadget, sans-serif;
-            font-size: 1.2rem; font-weight: 900; color: #fff; 
+            font-size: 1.3rem; font-weight: 900; color: #fff; 
             background: transparent; border: none; width: 100%; text-align: center;
-            padding: 0; margin: 0; display: block;
+            padding: 0; margin: 0;
+            display: block;
             -webkit-appearance: none; appearance: none;
         }
         .time-block input::-webkit-calendar-picker-indicator { display: none !important; }
 
-        .label { font-size: 0.6rem; font-weight: 900; color: #888; text-transform: uppercase; }
-        .val-big { font-size: 2.4rem; font-weight: 900; line-height: 0.8; letter-spacing: -1px; }
-        .val-small { font-size: 1.2rem; font-weight: 900; }
-        .weather-icon { font-size: 2.4rem; line-height: 1; margin-bottom: 2px; }
+        .label { 
+            font-size: 0.65rem; 
+            font-weight: 900; 
+            color: #888; 
+            text-transform: uppercase; 
+            margin-top: 0;
+        }
 
-        /* NAVEGACIÓN MÁS ESTRECHA */
+        .val-big { font-size: 2.6rem; font-weight: 900; line-height: 0.85; letter-spacing: -1px; }
+        .val-small { font-size: 1.3rem; font-weight: 900; }
+        .weather-icon { font-size: 2.6rem; line-height: 1; margin-bottom: 4px; }
+
+        /* NAVEGACIÓN */
         .nav-bar { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
-            gap: 4px; 
-            padding: 4px 0 0 0; /* Espacio mínimo arriba */
+            gap: 5px; 
+            padding: 5px 0 0 0;
             background: #fff;
         }
         
         .nav-btn { 
-            background: #000; border: none; border-radius: 10px; 
-            color: #fff; font-weight: 900; font-size: 1.1rem; 
-            padding: 10px; /* Reducido de 18px a 10px */
+            background: #000; border: none; border-radius: 12px; 
+            color: #fff; font-weight: 900; font-size: 1.2rem; padding: 18px;
             text-transform: uppercase;
         }
-        .nav-btn.active { 
-            background: #fff; color: #000; border: 3px solid #000; 
-            padding: 7px; /* Compensación por el borde */
-        }
+        .nav-btn.active { background: #fff; color: #000; border: 4px solid #000; padding: 14px; }
 
         .content-section { flex: 1; display: none; overflow: hidden; }
         .active-section { display: flex; flex-direction: column; }
-        #section-map { border-radius: 0 0 15px 15px; border: 4px solid #000; height: 100%; }
+        #section-map { border-radius: 0 0 15px 15px; border: 5px solid #000; height: 100%; }
     </style>
 </head>
 <body onload="init()">
@@ -161,15 +165,16 @@ function renderForecast(startTime) {
               wind = Math.round(h.wind_speed_10m[i]), 
               gusts = Math.round(h.wind_gusts_10m[i]);
 
+        // LÓGICA DE COLORES DE DATOS
         let cTemp = temp <= 5 ? '#60a5fa' : temp >= 28 ? '#fb923c' : '#ffffff';
-        let cProb = '#38bdf8';
+        let cProb = '#38bdf8'; // Azul agua siempre para lluvia
         let cWind = wind >= 30 ? '#ef4444' : wind >= 18 ? '#facc15' : '#ffffff';
         let cGust = gusts >= 40 ? '#ef4444' : gusts >= 25 ? '#facc15' : '#888';
 
         let risk = (gusts > 35 || prob > 40 || rain > 0.8) ? 'risk-high' : (gusts > 22 || prob > 15 || rain > 0.1) ? 'risk-med' : 'risk-low';
 
         let rainLarge = prob > 0 ? `${prob}%` : "--";
-        let rainSmall = rain > 0 ? `${rain.toFixed(1)}<small style="font-size:0.5rem">mm</small>` : "";
+        let rainSmall = rain > 0 ? `${rain.toFixed(1)}<small style="font-size:0.6rem">mm</small>` : "";
 
         html += `
             <div class="hour-card ${risk}">
