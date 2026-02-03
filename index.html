@@ -24,14 +24,14 @@
         
         .phone-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
 
-        .header { background: #000; padding: 10px; text-align: center; border-radius: 12px 12px 0 0; }
-        .header h2 { margin: 0; font-size: 1.4rem; color: #fff; text-transform: uppercase; letter-spacing: 1px; }
+        .header { background: #000; padding: 8px; text-align: center; border-radius: 12px 12px 0 0; }
+        .header h2 { margin: 0; font-size: 1.2rem; color: #fff; text-transform: uppercase; }
 
         #forecast-list { 
             flex: 1; 
             display: flex; 
             flex-direction: column; 
-            gap: 5px; 
+            gap: 4px; 
             overflow-y: auto; 
             margin-bottom: 0; 
         }
@@ -40,9 +40,9 @@
             display: grid;
             grid-template-columns: 85px 1fr 1fr 1fr;
             gap: 6px;
-            padding: 10px;
+            padding: 8px 10px;
             border-radius: 15px;
-            min-height: 120px;
+            min-height: 110px;
         }
         
         .risk-low { background-color: var(--bg-safe); }
@@ -55,52 +55,48 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 5px 2px;
+            justify-content: space-between;
+            padding: 4px 2px 6px 2px;
             color: #fff;
         }
 
-        /* QUITAR ICONO RELOJ DEL INPUT */
-        .time-block input {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-        }
-        .time-block input::-webkit-calendar-picker-indicator {
-            display: none !important;
-            -webkit-appearance: none;
-        }
-
         .time-block input, .time-block span { 
-            font-size: 1.3rem; font-weight: 900; color: #fff; 
-            background: #222; border-radius: 8px; border: 1px solid #444; 
-            width: 95%; text-align: center; padding: 4px 0;
-            display: block;
+            font-family: 'Arial Black', Gadget, sans-serif;
+            font-size: 1.2rem; font-weight: 900; color: #fff; 
+            background: transparent; border: none; width: 100%; text-align: center;
+            padding: 0; margin: 0; display: block;
+            -webkit-appearance: none; appearance: none;
         }
+        .time-block input::-webkit-calendar-picker-indicator { display: none !important; }
 
-        .label { font-size: 0.7rem; font-weight: 900; color: #bbb; text-transform: uppercase; }
-        .val-big { font-size: 2.6rem; font-weight: 900; line-height: 0.85; letter-spacing: -1px; }
-        .val-small { font-size: 1.3rem; font-weight: 900; margin-top: 2px; }
-        .weather-icon { font-size: 2.6rem; line-height: 1; margin-top: 4px; }
+        .label { font-size: 0.6rem; font-weight: 900; color: #888; text-transform: uppercase; }
+        .val-big { font-size: 2.4rem; font-weight: 900; line-height: 0.8; letter-spacing: -1px; }
+        .val-small { font-size: 1.2rem; font-weight: 900; }
+        .weather-icon { font-size: 2.4rem; line-height: 1; margin-bottom: 2px; }
 
+        /* NAVEGACIÓN MÁS ESTRECHA */
         .nav-bar { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
-            gap: 5px; 
-            padding: 5px 0 0 0;
+            gap: 4px; 
+            padding: 4px 0 0 0; /* Espacio mínimo arriba */
             background: #fff;
         }
         
         .nav-btn { 
-            background: #000; border: none; border-radius: 12px; 
-            color: #fff; font-weight: 900; font-size: 1.2rem; padding: 18px;
+            background: #000; border: none; border-radius: 10px; 
+            color: #fff; font-weight: 900; font-size: 1.1rem; 
+            padding: 10px; /* Reducido de 18px a 10px */
             text-transform: uppercase;
         }
-        .nav-btn.active { background: #fff; color: #000; border: 4px solid #000; padding: 14px; }
+        .nav-btn.active { 
+            background: #fff; color: #000; border: 3px solid #000; 
+            padding: 7px; /* Compensación por el borde */
+        }
 
         .content-section { flex: 1; display: none; overflow: hidden; }
         .active-section { display: flex; flex-direction: column; }
-        #section-map { border-radius: 0 0 15px 15px; border: 5px solid #000; height: 100%; }
+        #section-map { border-radius: 0 0 15px 15px; border: 4px solid #000; height: 100%; }
     </style>
 </head>
 <body onload="init()">
@@ -165,28 +161,39 @@ function renderForecast(startTime) {
               wind = Math.round(h.wind_speed_10m[i]), 
               gusts = Math.round(h.wind_gusts_10m[i]);
 
+        let cTemp = temp <= 5 ? '#60a5fa' : temp >= 28 ? '#fb923c' : '#ffffff';
+        let cProb = '#38bdf8';
+        let cWind = wind >= 30 ? '#ef4444' : wind >= 18 ? '#facc15' : '#ffffff';
+        let cGust = gusts >= 40 ? '#ef4444' : gusts >= 25 ? '#facc15' : '#888';
+
         let risk = (gusts > 35 || prob > 40 || rain > 0.8) ? 'risk-high' : (gusts > 22 || prob > 15 || rain > 0.1) ? 'risk-med' : 'risk-low';
+
+        let rainLarge = prob > 0 ? `${prob}%` : "--";
+        let rainSmall = rain > 0 ? `${rain.toFixed(1)}<small style="font-size:0.5rem">mm</small>` : "";
 
         html += `
             <div class="hour-card ${risk}">
-                <div class="data-block time-block">
-                    ${i===idx ? `<input type="time" value="${time}" onchange="renderForecast(this.value)">` : `<span>${time}</span>`}
+                <div class="data-block">
+                    <span class="label">HORA</span>
+                    <div class="time-block">
+                        ${i===idx ? `<input type="time" value="${time}" onchange="renderForecast(this.value)">` : `<span>${time}</span>`}
+                    </div>
                     <div class="weather-icon">${weatherIcons[h.weather_code[i]] || "🌤️"}</div>
                 </div>
                 <div class="data-block">
                     <span class="label">TEMP</span>
-                    <span class="val-big">${temp}°</span>
+                    <span class="val-big" style="color:${cTemp}">${temp}°</span>
                     <span class="val-small" style="color:#4ade80">${feel}°</span>
                 </div>
                 <div class="data-block">
                     <span class="label">LLUVIA</span>
-                    <span class="val-big">${prob}%</span>
-                    <span class="val-small" style="color:#60a5fa">${rain > 0 ? rain.toFixed(1) : '0.0'}</span>
+                    <span class="val-big" style="color:${cProb}">${rainLarge}</span>
+                    <span class="val-small" style="color:#60a5fa">${rainSmall}</span>
                 </div>
                 <div class="data-block">
                     <span class="label">VIENTO</span>
-                    <span class="val-big">${wind}</span>
-                    <span class="val-small" style="color:#facc15">${gusts}</span>
+                    <span class="val-big" style="color:${cWind}">${wind}</span>
+                    <span class="val-small" style="color:${cGust}">${gusts}</span>
                 </div>
             </div>`;
     }
