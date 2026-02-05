@@ -33,15 +33,26 @@
             text-transform: uppercase; margin-bottom: 8px;
         }
 
-        .content-section { display: none; margin-bottom: 8px; }
+        .content-section { display: none; margin-bottom: 8px; width: 100%; }
         .active-section { display: flex; flex-direction: column; gap: 8px; }
+
+        /* Ajuste del contenedor del mapa para que sea visible */
+        #section-mapa { 
+            height: 500px; 
+            width: 100%;
+            border-radius: 20px; 
+            overflow: hidden; 
+            background: #222;
+            border: 2px solid #333;
+        }
+        iframe { width: 100%; height: 100%; border: none; }
 
         .hour-card { 
             border-radius: 20px; padding: 5px;
             display: grid; grid-template-columns: 100px 1fr 1fr 95px; 
             gap: 5px; 
             border: 5px solid transparent;
-            min-height: 105px; /* Ligeramente más estrecha */
+            min-height: 105px;
         }
         
         .risk-low { background: var(--low); border-color: var(--low); }
@@ -68,29 +79,18 @@
         .label { font-size: 0.65rem; text-transform: uppercase; margin-bottom: 2px; opacity: 0.5; font-weight: bold; color: #fff; }
         
         .val-big { 
-            font-size: 2.6rem; 
-            font-weight: 900; 
-            letter-spacing: -2px; 
-            margin-top: 0px;    /* Espacio quitado */
-            line-height: 0.9;   /* Altura reducida */
+            font-size: 2.6rem; font-weight: 900; letter-spacing: -2px; 
+            margin-top: 0px; line-height: 0.9;   
         } 
 
         .val-small { 
-            font-size: 1.1rem; 
-            font-weight: bold; 
-            margin-top: -4px;   /* Sube el valor para pegarlo al grande */
-            margin-bottom: 0; 
-            opacity: 0.8; 
-            line-height: 1; 
+            font-size: 1.1rem; font-weight: bold; margin-top: -4px;   
+            margin-bottom: 0; opacity: 0.8; line-height: 1; 
         }
 
         .unit-tiny { 
-            font-size: 0.7rem; 
-            vertical-align: baseline; 
-            margin-left: 2px; 
-            opacity: 0.7; 
-            font-weight: normal;
-            text-transform: lowercase;
+            font-size: 0.7rem; vertical-align: baseline; margin-left: 2px; 
+            opacity: 0.7; font-weight: normal; text-transform: lowercase;
         }
 
         .time-box { background: #000 !important; justify-content: center; padding-top: 0; position: relative; }
@@ -100,8 +100,7 @@
         }
         .time-input { 
             background: transparent; border: none; color: var(--neon); 
-            width: 100%; outline: none; cursor: pointer;
-            -webkit-appearance: none;
+            width: 100%; outline: none; cursor: pointer; -webkit-appearance: none;
         }
         .time-input::-webkit-calendar-picker-indicator { 
             position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer;
@@ -118,7 +117,13 @@
 
 <div class="phone-container">
     <div class="header-title">PREVISIÓN BICI</div>
+    
     <div id="section-list" class="content-section active-section"></div>
+    
+    <div id="section-mapa" class="content-section">
+        <iframe id="map-frame" src=""></iframe>
+    </div>
+
     <nav class="nav-bar">
         <button id="btn-datos" class="nav-btn active" onclick="showSection('datos')">DATOS</button>
         <button id="btn-mapa" class="nav-btn" onclick="showSection('mapa')">MAPAS</button>
@@ -161,7 +166,6 @@ function renderForecast(startTime) {
     const list = document.getElementById('section-list');
     let html = '';
     const h = weatherData.hourly;
-    
     let targetHour = startTime || new Date().getHours().toString().padStart(2, '0') + ":00";
     let startIdx = h.time.findIndex(t => t.includes(`T${targetHour.split(':')[0]}:00`));
     if (startIdx === -1) startIdx = 0;
@@ -178,9 +182,7 @@ function renderForecast(startTime) {
               wind = Math.round(h.wind_speed_10m[idx]), 
               gusts = Math.round(h.wind_gusts_10m[idx]);
 
-        let riskClass = (prob > 40 || rain > 0.5) ? 'risk-high' : 
-                        (prob > 15 || rain > 0.1) ? 'risk-med'  : 
-                        'risk-low';
+        let riskClass = (prob > 40 || rain > 0.5) ? 'risk-high' : (prob > 15 || rain > 0.1) ? 'risk-med' : 'risk-low';
 
         html += `
             <div class="hour-card ${riskClass}">
@@ -212,8 +214,26 @@ function renderForecast(startTime) {
 }
 
 function showSection(s) {
-    document.getElementById('section-list').style.display = s === 'datos' ? 'flex' : 'none';
-    document.getElementById('btn-datos').classList.toggle('active', s === 'datos');
+    const list = document.getElementById('section-list');
+    const mapa = document.getElementById('section-mapa');
+    const iframe = document.getElementById('map-frame');
+
+    if (s === 'datos') {
+        list.style.display = 'flex';
+        mapa.style.display = 'none';
+        document.getElementById('btn-datos').classList.add('active');
+        document.getElementById('btn-mapa').classList.remove('active');
+    } else {
+        list.style.display = 'none';
+        mapa.style.display = 'block';
+        document.getElementById('btn-datos').classList.remove('active');
+        document.getElementById('btn-mapa').classList.add('active');
+        
+        // URL de Windy corregida para que cargue correctamente
+        if (iframe.src === "" || iframe.src === window.location.href) {
+            iframe.src = `https://embed.windy.com/embed2.html?lat=${LAT}&lon=${LON}&zoom=8&level=surface&overlay=rain&product=ecmwf&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`;
+        }
+    }
 }
 </script>
 </body>
