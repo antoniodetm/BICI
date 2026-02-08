@@ -28,11 +28,18 @@
         }
 
         .header-title { 
-            background: #333; color: white; text-align: center; 
-            padding: 10px; border-radius: 10px; font-size: 1.2rem;
+            background: #333; color: white; 
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 15px; border-radius: 10px; font-size: 1.2rem;
             text-transform: uppercase; margin-bottom: 8px;
         }
 
+        .accu-btn {
+            background: #ff8000; color: #000; 
+            text-decoration: none; font-size: 0.7rem; font-weight: 900;
+            padding: 5px 8px; border-radius: 5px;
+            display: flex; align-items: center; gap: 4px;
+        }
         .content-section { display: none; margin-bottom: 8px; width: 100%; }
         .active-section { display: flex; flex-direction: column; gap: 8px; }
 
@@ -116,7 +123,12 @@
 <body onload="init()">
 
 <div class="phone-container">
-    <div class="header-title">PREVISIÓN BICI</div>
+    <div class="header-title">
+        <span>PREVISIÓN BICI</span>
+        <a href="https://www.accuweather.com/es/search-locations?query=40.342,-3.831" target="_blank" class="accu-btn">
+            ACCUWEATHER
+        </a>
+    </div>
     
     <div id="section-list" class="content-section active-section"></div>
     
